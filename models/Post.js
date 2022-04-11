@@ -27,3 +27,5 @@ PostSchema.virtual("url").get(function () {
 PostSchema.virtual("date_format").get(function () {
   return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
 });
+
+module.exports = mongoose.model("Post", PostSchema);

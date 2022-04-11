@@ -5,15 +5,15 @@ var post_controller = require("../controllers/post_controller");
 
 /* GET home page. */
 router.get("/", post_controller.index);
-// // POSTS_CONTROLLER
-// router.get("/post/new", post_controller.new_post_get);
-// router.post("/post/new", post_controller.new_post_post);
+// POSTS_CONTROLLER
+router.get("/post/new", post_controller.new_post_get);
+router.post("/post/new", post_controller.new_post_post);
 
-// router.get("/post/:id/update", post_controller.update_post_get);
-// router.post("/post/:id/update", post_controller.update_post_post);
+router.get("/post/:id/update", post_controller.update_post_get);
+router.post("/post/:id/update", post_controller.update_post_post);
 
-// router.get("/post/:id/delete", post_controller.delete_post_get);
-// router.post("/post/:id/delete", post_controller.delete_post_post);
+router.get("/post/:id/delete", post_controller.delete_post_get);
+router.post("/post/:id/delete", post_controller.delete_post_post);
 
 // // USERS_CONTROLLER
 // router.get("/user/new", user_controller.new_user_get);
