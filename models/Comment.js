@@ -9,7 +9,7 @@ var CommentSchema = new Schema({
   content: { type: String, required: true },
   likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
   subComments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
-  date: newDate(),
+  date: { type: Date, default: new Date() },
 });
 
 CommentSchema.virtual("url").get(function () {
@@ -19,3 +19,5 @@ CommentSchema.virtual("url").get(function () {
 CommentSchema.virtual("date_format").get(function () {
   return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
 });
+
+module.exports = mongoose.model("Comment", CommentSchema);

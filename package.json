@@ -7,7 +7,9 @@
     "devstart": "nodemon ./bin/www",
     "serverstart": "DEBUG=express-locallibrary:* npm run devstart"
   },
-  "engines": { "node": "16.14.0" },
+  "engines": {
+    "node": "16.14.0"
+  },
   "dependencies": {
     "async": "^3.2.3",
     "cookie-parser": "~1.4.4",
@@ -19,7 +21,8 @@
     "jade": "~1.11.0",
     "luxon": "^2.3.1",
     "mongoose": "^6.2.10",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "pug": "^3.0.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
