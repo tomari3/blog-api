@@ -4,6 +4,7 @@ const { DateTime } = require("luxon");
 var Schema = mongoose.Schema;
 
 var CommentSchema = new Schema({
+  parent: { type: Schema.Types.ObjectId, ref: "Post" || "Comment" },
   user: { type: Schema.Types.ObjectId, ref: "User" },
   header: { type: String, required: true },
   content: { type: String, required: true },
