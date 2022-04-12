@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-const { DateTime } = require("luxon");
+// const { DateTime } = require("luxon");
 const bcrypt = require("bcrypt");
 
 var Schema = mongoose.Schema;
@@ -20,8 +20,8 @@ UserSchema.virtual("url").get(function () {
   return "users/" + this._id;
 });
 
-UserSchema.virtual("date_format").get(function () {
-  return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
-});
+// UserSchema.virtual("date_format").get(function () {
+//   return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
+// });
 
 module.exports = mongoose.model("User", UserSchema);

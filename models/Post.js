@@ -1,5 +1,5 @@
 var mongoose = require("mongoose");
-const { DateTime } = require("luxon");
+// const { DateTime } = require("luxon");
 
 var Schema = mongoose.Schema;
 
@@ -25,8 +25,8 @@ PostSchema.virtual("url").get(function () {
   return "posts/" + this._id;
 });
 
-PostSchema.virtual("date_format").get(function () {
-  return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
-});
+// PostSchema.virtual("date_format").get(function () {
+//   return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
+// });
 
 module.exports = mongoose.model("Post", PostSchema);

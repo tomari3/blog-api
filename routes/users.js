@@ -1,22 +1,20 @@
 require("dotenv").config();
 
-const User = require("../models/User");
-
 var express = require("express");
 var router = express.Router();
 const passport = require("passport");
 const utils = require("../lib/utils");
 
+const User = require("../models/User");
+
 router.get(
   "/protected",
   passport.authenticate("jwt", { session: false }),
   (req, res, next) => {
-    res
-      .status(200)
-      .json({
-        success: true,
-        msg: "You are successfully authenticated to this route!",
-      });
+    res.status(200).json({
+      success: true,
+      msg: "You are successfully authenticated to this route!",
+    });
   }
 );
 
