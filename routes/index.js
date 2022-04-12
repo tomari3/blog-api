@@ -5,32 +5,13 @@ const User = require("../models/User");
 var express = require("express");
 var router = express.Router();
 const passport = require("passport");
+const utils = require("../lib/utils");
 
 var post_controller = require("../controllers/post_controller");
 
 /* GET home page. */
 router.get("/", post_controller.index);
 
-router.get("/signup", (req, res, next) => {
-  const saltHash = utils.genPassword(req.body.password);
-
-  const salt = saltHash.salt;
-  const has = saltHash.saltHash;
-
-  const newUser = new User({
-    username: req.body.username,
-    hash: hash,
-    salt: salt,
-  });
-
-  try {
-    newUser.save().then((user) => {
-      res.json({ success: true, user: user });
-    });
-  } catch (err) {
-    res.json({ success: false, msg: err });
-  }
-});
 // POSTS_CONTROLLER
 router.get("/post/new", post_controller.new_post_get);
 router.post("/post/new", post_controller.new_post_post);
