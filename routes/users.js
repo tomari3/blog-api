@@ -7,7 +7,19 @@ var router = express.Router();
 const passport = require("passport");
 const utils = require("../lib/utils");
 
-/* GET users listing. */
+router.get(
+  "/protected",
+  passport.authenticate("jwt", { session: false }),
+  (req, res, next) => {
+    res
+      .status(200)
+      .json({
+        success: true,
+        msg: "You are successfully authenticated to this route!",
+      });
+  }
+);
+
 router.post("/login", (req, res, next) => {
   User.findOne({ username: req.body.username })
     .then((user) => {
