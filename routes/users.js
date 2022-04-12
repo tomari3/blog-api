@@ -3,6 +3,7 @@ const router = require("express").Router();
 const passport = require("passport");
 const utils = require("../lib/utils");
 
+user_controller = require("../controllers/user_controller");
 const User = require("../models/User");
 
 router.get(
@@ -68,4 +69,11 @@ router.post("/signup", (req, res, next) => {
     res.json({ success: false, msg: err });
   }
 });
+
+router.get("/:id/update", user_controller.update_user_get);
+// router.post("/:id/update", user_controller.update_user_post);
+
+// router.get("/:id/delete", user_controller.delete_user_get);
+// router.post("/:id/delete", user_controller.delete_user_post);
+
 module.exports = router;
