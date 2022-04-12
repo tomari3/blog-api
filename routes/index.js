@@ -1,19 +1,35 @@
 require("dotenv").config();
 
-var express = require("express");
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
+var express = require("express");
 var router = express.Router();
+const passport = require("passport");
 
 var post_controller = require("../controllers/post_controller");
-const User = require("../models/User");
 
 /* GET home page. */
 router.get("/", post_controller.index);
 
 router.get("/signup", (req, res, next) => {
-  res.json({ msg: "hey" });
+  const saltHash = utils.genPassword(req.body.password);
+
+  const salt = saltHash.salt;
+  const has = saltHash.saltHash;
+
+  const newUser = new User({
+    username: req.body.username,
+    hash: hash,
+    salt: salt,
+  });
+
+  try {
+    newUser.save().then((user) => {
+      res.json({ success: true, user: user });
+    });
+  } catch (err) {
+    res.json({ success: false, msg: err });
+  }
 });
 // POSTS_CONTROLLER
 router.get("/post/new", post_controller.new_post_get);

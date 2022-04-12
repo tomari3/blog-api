@@ -7,7 +7,8 @@ var Schema = mongoose.Schema;
 var UserSchema = new Schema({
   username: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  hash: { type: String, required: true },
+  salt: { type: String, required: true },
   isAdmin: { type: Boolean, required: true, default: false },
   likedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
   savedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
