@@ -11,6 +11,7 @@ var post_controller = require("../controllers/post_controller");
 
 /* GET home page. */
 router.get("/", post_controller.index);
+router.use("/users", require("./users"));
 
 // POSTS_CONTROLLER
 router.get("/post/new", post_controller.new_post_get);

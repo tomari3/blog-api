@@ -1,7 +1,5 @@
-require("dotenv").config();
-
-var express = require("express");
-var router = express.Router();
+const mongoose = require("mongoose");
+const router = require("express").Router();
 const passport = require("passport");
 const utils = require("../lib/utils");
 
@@ -30,6 +28,7 @@ router.post("/login", (req, res, next) => {
         user.hash,
         user.salt
       );
+
       if (isValid) {
         const tokenObject = utils.issueJWT(user);
 

@@ -17,15 +17,14 @@ module.exports = (passport) => {
   passport.use(
     new JwtStrategy(options, function (jwt_payload, done) {
       console.log(jwt_payload);
-
-      User.findOne({ _id: jwt_payload.sub }, function (err, user) {
+      User.findById({ _id: jwt_payload.sub }, function (err, user) {
         if (err) {
-          return done(err, false);
+          return done(err, false); // error no user
         }
         if (user) {
-          return done(null, user);
+          return done(null, user); // no error, correct user
         } else {
-          return done(null, false);
+          return done(null, false); // no error, incorrect user
         }
       });
     })
