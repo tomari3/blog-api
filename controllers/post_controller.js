@@ -5,7 +5,6 @@ var Tag = require("../models/Tag");
 
 const { body, validationResult } = require("express-validator");
 var async = require("async");
-const { off } = require("../models/Post");
 
 exports.index = function (req, res, next) {
   async.parallel(

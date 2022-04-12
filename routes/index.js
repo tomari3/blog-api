@@ -11,6 +11,10 @@ const User = require("../models/User");
 
 /* GET home page. */
 router.get("/", post_controller.index);
+
+router.get("/signup", (req, res, next) => {
+  res.json({ msg: "hey" });
+});
 // POSTS_CONTROLLER
 router.get("/post/new", post_controller.new_post_get);
 router.post("/post/new", post_controller.new_post_post);
