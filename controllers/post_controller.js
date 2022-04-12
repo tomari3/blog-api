@@ -10,7 +10,7 @@ exports.index = function (req, res, next) {
   async.parallel(
     {
       posts: function (cb) {
-        Post.find({ status: "public" })
+        Post.find()
           .sort({ date: 1 })
           .populate("tag")
           .populate("comment")
@@ -25,17 +25,44 @@ exports.index = function (req, res, next) {
       if (err) {
         next(err);
       }
-      res.json(200, { posts: results.posts, tags: results.tags });
+      res.json({ posts: results.posts, tags: results.tags });
     }
   );
 };
 
 exports.new_post_get = function (req, res, next) {
-  res.send("NEW POST GET");
+  async.parallel(
+    {
+      posts: function (cb) {
+        Post.find()
+          .limit(10)
+          .populate("tag")
+          .populate("comment")
+          .populate("user")
+          .sort({ date: 1 })
+          .exec(cb);
+      },
+      tags: function (cb) {
+        Tag.find({}).exec(cb);
+      },
+      users: function (cb) {
+        User.find().limit(10).exec(cb);
+      },
+    },
+    function (err, results) {
+      if (err) {
+        return next(err);
+      }
+      res.json({
+        posts: results.posts,
+        tags: results.tags,
+        users: results.users,
+      });
+    }
+  );
 };
-exports.new_post_post = function (req, res, next) {
-  res.send("NEW POST POST");
-};
+
+exports.new_post_post = function (req, res, next) {};
 
 exports.update_post_get = function (req, res, next) {
   res.send("UPDATE POST GET");

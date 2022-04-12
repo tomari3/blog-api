@@ -1,11 +1,12 @@
 var mongoose = require("mongoose");
 const { DateTime } = require("luxon");
+const bcrypt = require("bcrypt");
 
 var Schema = mongoose.Schema;
 
 var UserSchema = new Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true },
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   isAdmin: { type: Boolean, required: true, default: false },
   likedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],

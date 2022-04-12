@@ -1,7 +1,13 @@
+require("dotenv").config();
+
 var express = require("express");
+const passport = require("passport");
+const jwt = require("jsonwebtoken");
+
 var router = express.Router();
 
 var post_controller = require("../controllers/post_controller");
+const User = require("../models/User");
 
 /* GET home page. */
 router.get("/", post_controller.index);
@@ -16,6 +22,9 @@ router.get("/post/:id/delete", post_controller.delete_post_get);
 router.post("/post/:id/delete", post_controller.delete_post_post);
 
 // // USERS_CONTROLLER
+
+// router.get("/user/new", user_controller.new_user_get);
+
 // router.get("/user/new", user_controller.new_user_get);
 // router.post("/user/new", user_controller.new_user_post);
 
