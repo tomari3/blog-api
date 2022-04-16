@@ -15,8 +15,11 @@ var PostSchema = new Schema({
   },
   isPinned: { type: Boolean, required: true, default: false },
   tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
-  likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  saves: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  // likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  // saves: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  likes: { type: Number, default: 0 },
+  saves: { type: Number, default: 0 },
+  // comments: { type: [String] },
   comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   date: { type: Date, default: new Date() },
 });

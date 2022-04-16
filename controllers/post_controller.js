@@ -5,6 +5,7 @@ var Tag = require("../models/Tag");
 
 const { body, validationResult } = require("express-validator");
 var async = require("async");
+const { findByIdAndUpdate } = require("../models/User");
 
 exports.index = function (req, res, next) {
   async.parallel(
@@ -162,6 +163,57 @@ exports.new_post_post = [
     }
   },
 ];
+
+exports.like_post_post = (req, res, next) => {
+  console.log(req.body.id);
+  Post.findByIdAndUpdate(
+    req.body.id,
+    { $inc: { likes: 1 } },
+    { new: true }
+  ).exec((err, post) => {
+    if (err) return err;
+    res.json(post.likes);
+  });
+};
+
+exports.save_post_post = (req, res, next) => {
+  Post.findByIdAndUpdate(
+    req.body.id,
+    { $inc: { saves: 1 } },
+    { new: true }
+  ).exec((err, post) => {
+    if (err) return err;
+    res.json(post.saves);
+  });
+};
+
+exports.comment_post_post = (req, res, next) => {
+  async.waterfall(
+    [
+      (next) => {
+        new Comment({ parent: req.body.id, content: req.body.comment }).save(
+          next
+        );
+      },
+      (newCom, next) => {
+        Post.findByIdAndUpdate(
+          req.body.id,
+          { $push: { comments: newCom } },
+          { new: true }
+        )
+          .populate("comments")
+          .exec(next);
+      },
+    ],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json(results.comments);
+      console.log(results.comments);
+    }
+  );
+};
 
 exports.update_post_get = function (req, res, next) {
   async.parallel(
