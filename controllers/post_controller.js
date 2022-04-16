@@ -65,12 +65,14 @@ exports.new_post_get = function (req, res, next) {
 
 exports.new_post_post = [
   (req, res, next) => {
-    if (!(req.body.tags instanceof Array)) {
-      if (typeof req.body.tags === "undefined") req.body.tags = [];
-      else req.body.tags = new Array(req.body.tags);
-    }
+    const tags = [];
+    req.body.tags.split(",").map((tag, i) => {
+      tags.push(tag.trim());
+    });
+    req.body.tags = tags;
     next();
   },
+
   body("header")
     .trim()
     .isLength({ min: 1 })
@@ -86,7 +88,36 @@ exports.new_post_post = [
   body("tags.*").escape(),
 
   (req, res, next) => {
+    const allTags = [];
+    req.body.tags.map((tag) => {
+      Tag.findOne({ name: tag }).exec((err, found) => {
+        if (err) {
+          next(err);
+        }
+        found
+          ? allTags.push(found)
+          : (found = new Tag({ name: tag }).save((err, new_tag) => {
+              if (err) return next(err);
+              allTags.push(new_tag);
+              if (req.body.tags.length === allTags.length) {
+                req.body.tags = allTags;
+                console.log("next");
+                next();
+              }
+            }));
+        if (req.body.tags.length === allTags.length) {
+          req.body.tags = allTags;
+          console.log("next");
+          next();
+        }
+      });
+    });
+  },
+
+  (req, res, next) => {
     const errors = validationResult(res);
+
+    console.log(req.body);
 
     var post = new Post({
       header: req.body.header,
@@ -97,37 +128,30 @@ exports.new_post_post = [
     });
 
     if (!errors.isEmpty()) {
-      async.parallel(
-        {
-          posts: function (cb) {
-            Post.find()
-              .limit(10)
-              .populate("tags")
-              .populate("comments")
-              .populate("likes")
-              .populate("saves")
-              .sort({ date: 1 })
-              .exec(cb);
-          },
-          tags: function (cb) {
-            Tag.find({}).exec(cb);
-          },
-          users: function (cb) {
-            User.find().limit(10).exec(cb);
-          },
+      async.parallel({
+        posts: function (cb) {
+          Post.find()
+            .limit(10)
+            .populate("tags")
+            .populate("comments")
+            .populate("likes")
+            .populate("saves")
+            .sort({ date: 1 })
+            .exec(cb);
         },
-        function (err, results) {
-          if (err) {
-            return next(err);
-          }
-        }
-      );
-      for (let i = 0; i < results.tags.length; i += 1) {
-        if (post.tags.indexOf(results.tags[i]._id) > -1) {
-          results.tags[i].checked = "true";
-        }
-      }
-      return; // todo
+        tags: function (cb) {
+          Tag.find({}).exec(cb);
+        },
+        users: function (cb) {
+          User.find().limit(10).exec(cb);
+        },
+      });
+
+      res.json({
+        posts: results.posts,
+        tags: results.tags,
+        users: results.users,
+      });
     } else {
       post.save(function (err) {
         if (err) {
