@@ -5,7 +5,6 @@ var Tag = require("../models/Tag");
 
 const { body, validationResult } = require("express-validator");
 var async = require("async");
-const { findByIdAndUpdate } = require("../models/User");
 
 exports.index = function (req, res, next) {
   async.parallel(
@@ -13,6 +12,7 @@ exports.index = function (req, res, next) {
       posts: function (cb) {
         Post.find()
           .sort({ date: 1 })
+          .populate("author")
           .populate("tags")
           .populate("comments")
           .populate("likes")
@@ -116,11 +116,20 @@ exports.new_post_post = [
   },
 
   (req, res, next) => {
+    User.findById(req.body.id).exec((err, found) => {
+      if (err) return next(err);
+      req.body.id = found;
+      next();
+    });
+  },
+
+  (req, res, next) => {
     const errors = validationResult(res);
 
     console.log(req.body);
 
     var post = new Post({
+      author: req.body.id,
       header: req.body.header,
       content: req.body.content,
       status: req.body.status,
@@ -165,25 +174,64 @@ exports.new_post_post = [
 ];
 
 exports.like_post_post = (req, res, next) => {
-  console.log(req.body.id);
-  Post.findByIdAndUpdate(
-    req.body.id,
-    { $inc: { likes: 1 } },
-    { new: true }
-  ).exec((err, post) => {
-    if (err) return err;
-    res.json(post.likes);
+  Post.findById(req.body.postID).exec((err, post) => {
+    if (err) return next(err);
+    if (post.likes.includes(req.body.userID)) {
+      Post.findByIdAndUpdate(
+        req.body.postID,
+        {
+          $pull: { likes: req.body.userID },
+        },
+        { new: true }
+      ).exec((err, post) => {
+        if (err) return next(err);
+        res.json(post.likes);
+        next();
+      });
+    } else {
+      Post.findByIdAndUpdate(
+        req.body.postID,
+        {
+          $push: { likes: req.body.userID },
+        },
+        { new: true }
+      ).exec((err, post) => {
+        if (err) return next(err);
+        res.json(post.likes);
+        next();
+      });
+    }
   });
 };
 
 exports.save_post_post = (req, res, next) => {
-  Post.findByIdAndUpdate(
-    req.body.id,
-    { $inc: { saves: 1 } },
-    { new: true }
-  ).exec((err, post) => {
-    if (err) return err;
-    res.json(post.saves);
+  Post.findById(req.body.postID).exec((err, post) => {
+    if (err) return next(err);
+    if (post.likes.includes(req.body.userID)) {
+      Post.findByIdAndUpdate(
+        req.body.postID,
+        {
+          $pull: { likes: req.body.userID },
+        },
+        { new: true }
+      ).exec((err, post) => {
+        if (err) return next(err);
+        res.json(post.likes);
+        next();
+      });
+    } else {
+      Post.findByIdAndUpdate(
+        req.body.postID,
+        {
+          $push: { likes: req.body.userID },
+        },
+        { new: true }
+      ).exec((err, post) => {
+        if (err) return next(err);
+        res.json(post.likes);
+        next();
+      });
+    }
   });
 };
 

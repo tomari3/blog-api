@@ -4,7 +4,7 @@ var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
 var PostSchema = new Schema({
-  // author: { type: Schema.Types.ObjectId, ref: "User" },
+  author: { type: Schema.Types.ObjectId, ref: "User" },
   header: { type: String, required: true },
   content: { type: String, required: true },
   status: {
@@ -15,11 +15,8 @@ var PostSchema = new Schema({
   },
   isPinned: { type: Boolean, required: true, default: false },
   tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
-  // likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  // saves: [{ type: Schema.Types.ObjectId, ref: "User" }],
-  likes: { type: Number, default: 0 },
-  saves: { type: Number, default: 0 },
-  // comments: { type: [String] },
+  likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  saves: [{ type: Schema.Types.ObjectId, ref: "User" }],
   comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   date: { type: Date, default: new Date() },
 });
