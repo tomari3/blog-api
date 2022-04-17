@@ -207,28 +207,28 @@ exports.like_post_post = (req, res, next) => {
 exports.save_post_post = (req, res, next) => {
   Post.findById(req.body.postID).exec((err, post) => {
     if (err) return next(err);
-    if (post.likes.includes(req.body.userID)) {
+    if (post.saves.includes(req.body.userID)) {
       Post.findByIdAndUpdate(
         req.body.postID,
         {
-          $pull: { likes: req.body.userID },
+          $pull: { saves: req.body.userID },
         },
         { new: true }
       ).exec((err, post) => {
         if (err) return next(err);
-        res.json(post.likes);
+        res.json(post.saves);
         next();
       });
     } else {
       Post.findByIdAndUpdate(
         req.body.postID,
         {
-          $push: { likes: req.body.userID },
+          $push: { saves: req.body.userID },
         },
         { new: true }
       ).exec((err, post) => {
         if (err) return next(err);
-        res.json(post.likes);
+        res.json(post.saves);
         next();
       });
     }
