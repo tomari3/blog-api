@@ -9,7 +9,7 @@
 
 ## Database Design
 
-![Alt text](relative/path/to/BlogApiDiagram.png?raw=true "Database Design")
+![Database Design](BlogApiDiagram.png?raw=true "Database Design")
 
 ## Install
 
