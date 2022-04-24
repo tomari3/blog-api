@@ -8,6 +8,7 @@ const passport = require("passport");
 const utils = require("../lib/utils");
 
 var post_controller = require("../controllers/post_controller");
+var tag_controller = require("../controllers/tag_controller");
 
 /* GET home page. */
 router.get("/", post_controller.index);
@@ -40,6 +41,9 @@ router.post("/post/:id/delete", post_controller.delete_post_post);
 // router.post("/comment/:id/delete", comment_controller.delete_comment_post);
 
 // // TAGS_CONTROLLER
+
+router.get("/tag/:id", tag_controller.tags_posts_get);
+
 // router.get("/tag/new", tag_controller.new_tag_get);
 // router.post("/tag/new", tag_controller.new_tag_post);
 

@@ -174,8 +174,15 @@ exports.new_post_post = [
 ];
 
 exports.like_post_post = (req, res, next) => {
+  if (!req.body.userID) {
+    res.status(401).json(err);
+    next(err);
+  }
   Post.findById(req.body.postID).exec((err, post) => {
-    if (err) return next(err);
+    if (err) {
+      res.status(401).json(err);
+      next(err);
+    }
     if (post.likes.includes(req.body.userID)) {
       Post.findByIdAndUpdate(
         req.body.postID,
@@ -184,7 +191,10 @@ exports.like_post_post = (req, res, next) => {
         },
         { new: true }
       ).exec((err, post) => {
-        if (err) return next(err);
+        if (err) {
+          res.status(401).json(err);
+          next(err);
+        }
         res.json(post.likes);
         next();
       });
@@ -196,7 +206,10 @@ exports.like_post_post = (req, res, next) => {
         },
         { new: true }
       ).exec((err, post) => {
-        if (err) return next(err);
+        if (err) {
+          res.status(401).json(err);
+          next(err);
+        }
         res.json(post.likes);
         next();
       });
