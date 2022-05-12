@@ -36,7 +36,8 @@ router.post("/login", (req, res, next) => {
         res.status(200).json({
           success: true,
           user: { id: user._id, name: user.username },
-          token: tokenObject.token,
+          accessToken: tokenObject.accessToken,
+          refreshToken: tokenObject.refreshToken,
           expiresIn: tokenObject.expires,
         });
       } else {

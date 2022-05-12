@@ -6,7 +6,7 @@ var Tag = require("../models/Tag");
 const { body, validationResult } = require("express-validator");
 var async = require("async");
 
-exports.index = function (req, res, next) {
+exports.index = (req, res, next) => {
   async.parallel(
     {
       posts: function (cb) {
@@ -32,23 +32,23 @@ exports.index = function (req, res, next) {
   );
 };
 
-exports.new_post_get = function (req, res, next) {
+exports.new_post_get = (req, res, next) => {
   async.parallel(
     {
       posts: function (cb) {
-        Post.find()
+        Post.find({})
+          .sort({ date: 1 })
           .limit(10)
           .populate("tags")
           .populate("comments")
-          .populate("user")
-          .sort({ date: 1 })
+          .populate("author")
           .exec(cb);
       },
       tags: function (cb) {
-        Tag.find({}).exec(cb);
+        Tag.find({}).limit(20).exec(cb);
       },
       users: function (cb) {
-        User.find().limit(10).exec(cb);
+        User.find({}).limit(10).exec(cb);
       },
     },
     function (err, results) {
@@ -174,20 +174,20 @@ exports.new_post_post = [
 ];
 
 exports.like_post_post = (req, res, next) => {
-  if (!req.body.userID) {
+  if (!req.body.userId) {
     res.status(401).json(err);
     next(err);
   }
-  Post.findById(req.body.postID).exec((err, post) => {
+  Post.findById(req.params.id).exec((err, post) => {
     if (err) {
       res.status(401).json(err);
       next(err);
     }
-    if (post.likes.includes(req.body.userID)) {
+    if (post.likes.includes(req.body.userId)) {
       Post.findByIdAndUpdate(
-        req.body.postID,
+        req.params.id,
         {
-          $pull: { likes: req.body.userID },
+          $pull: { likes: req.body.userId },
         },
         { new: true }
       ).exec((err, post) => {
@@ -200,9 +200,9 @@ exports.like_post_post = (req, res, next) => {
       });
     } else {
       Post.findByIdAndUpdate(
-        req.body.postID,
+        req.params.id,
         {
-          $push: { likes: req.body.userID },
+          $push: { likes: req.body.userId },
         },
         { new: true }
       ).exec((err, post) => {
@@ -252,13 +252,13 @@ exports.comment_post_post = (req, res, next) => {
   async.waterfall(
     [
       (next) => {
-        new Comment({ parent: req.body.id, content: req.body.comment }).save(
+        new Comment({ parent: req.params.id, content: req.body.content }).save(
           next
         );
       },
       (newCom, next) => {
         Post.findByIdAndUpdate(
-          req.body.id,
+          req.params.id,
           { $push: { comments: newCom } },
           { new: true }
         )
