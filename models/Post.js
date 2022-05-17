@@ -5,13 +5,11 @@ var Schema = mongoose.Schema;
 
 var PostSchema = new Schema({
   author: { type: Schema.Types.ObjectId, ref: "User" },
-  header: { type: String, required: true },
   content: { type: String, required: true },
   status: {
-    type: String,
+    type: Boolean,
     required: true,
-    enum: ["private", "public"],
-    default: "private",
+    default: false,
   },
   isPinned: { type: Boolean, required: true, default: false },
   tags: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
@@ -25,8 +23,8 @@ PostSchema.virtual("url").get(function () {
   return "posts/" + this._id;
 });
 
-// PostSchema.virtual("date_format").get(function () {
-//   return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
-// });
+PostSchema.virtual("date_format").get(function () {
+  return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
+});
 
 module.exports = mongoose.model("Post", PostSchema);

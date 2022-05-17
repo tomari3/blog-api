@@ -5,11 +5,11 @@ const bcrypt = require("bcrypt");
 var Schema = mongoose.Schema;
 
 var UserSchema = new Schema({
-  username: { type: String, required: true },
+  username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
-  isAdmin: { type: Boolean, required: true, default: false },
+  isAdmin: { type: Boolean, default: false },
   likedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
   savedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
   profilePicture: String,

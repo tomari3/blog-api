@@ -11,12 +11,9 @@ exports.index = (req, res, next) => {
     {
       posts: function (cb) {
         Post.find()
-          .sort({ date: 1 })
-          .populate("author")
+          .sort({ date: -1 })
+          .populate("author", "username")
           .populate("tags")
-          .populate("comments")
-          .populate("likes")
-          .populate("saves")
           .exec(cb);
       },
       tags: function (cb) {
@@ -74,11 +71,6 @@ exports.new_post_post = [
     next();
   },
 
-  body("header")
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage("must provide header"),
   body("content")
     .trim()
     .isLength({ min: 1 })
@@ -124,13 +116,12 @@ exports.new_post_post = [
   },
 
   (req, res, next) => {
-    const errors = validationResult(res);
+    const errors = validationResult(req);
 
     console.log(req.body);
 
     var post = new Post({
       author: req.body.id,
-      header: req.body.header,
       content: req.body.content,
       status: req.body.status,
       isPinned: req.body.isPinned,
@@ -248,13 +239,29 @@ exports.save_post_post = (req, res, next) => {
   });
 };
 
+exports.comment_post_get = (req, res, next) => {
+  Post.findById(req.params.id)
+    .populate({
+      path: "comments",
+      populate: { path: "author", select: "username" },
+    })
+    .exec((err, post) => {
+      if (err) {
+        next(err);
+      }
+      res.json(post.comments);
+    });
+};
+
 exports.comment_post_post = (req, res, next) => {
   async.waterfall(
     [
       (next) => {
-        new Comment({ parent: req.params.id, content: req.body.content }).save(
-          next
-        );
+        new Comment({
+          author: req.body.id,
+          parent: req.params.id,
+          content: req.body.content,
+        }).save(next);
       },
       (newCom, next) => {
         Post.findByIdAndUpdate(
@@ -262,7 +269,10 @@ exports.comment_post_post = (req, res, next) => {
           { $push: { comments: newCom } },
           { new: true }
         )
-          .populate("comments")
+          .populate({
+            path: "comments",
+            populate: { path: "author", select: "username" },
+          })
           .exec(next);
       },
     ],
@@ -271,7 +281,6 @@ exports.comment_post_post = (req, res, next) => {
         return next(err);
       }
       res.json(results.comments);
-      console.log(results.comments);
     }
   );
 };

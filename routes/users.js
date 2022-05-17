@@ -49,28 +49,7 @@ router.post("/login", (req, res, next) => {
     });
 });
 
-router.post("/signup", (req, res, next) => {
-  const saltHash = utils.genPassword(req.body.password);
-
-  const salt = saltHash.salt;
-  const hash = saltHash.hash;
-
-  const newUser = new User({
-    email: req.body.email,
-    username: req.body.username,
-    hash: hash,
-    salt: salt,
-    isAdmin: "false",
-  });
-
-  try {
-    newUser.save().then((user) => {
-      res.json({ success: true, user: user });
-    });
-  } catch (err) {
-    res.json({ success: false, msg: err });
-  }
-});
+router.post("/signup", user_controller.new_user_post);
 
 router.get("/:id/update", user_controller.update_user_get);
 // router.post("/:id/update", user_controller.update_user_post);

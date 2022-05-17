@@ -5,8 +5,7 @@ var Schema = mongoose.Schema;
 
 var CommentSchema = new Schema({
   parent: { type: Schema.Types.ObjectId, ref: "Post" || "Comment" },
-  // user: { type: Schema.Types.ObjectId, ref: "User" },
-  // header: { type: String, required: true },
+  author: { type: Schema.Types.ObjectId, ref: "User" },
   content: { type: String, required: true },
   likes: [{ type: Schema.Types.ObjectId, ref: "User", unique: true }],
   subComments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
