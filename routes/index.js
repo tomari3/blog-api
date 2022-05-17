@@ -20,8 +20,9 @@ router.post("/post/new", post_controller.new_post_post);
 
 router.post("/post/:id/like", post_controller.like_post_post);
 router.post("/post/:id/save", post_controller.save_post_post);
+
 router.post("/post/:id/comment", post_controller.comment_post_post);
-router.post("/post/:id/comments", post_controller.comment_post_get);
+router.get("/post/:id/comments", post_controller.comment_post_get);
 // router.post("/post/:id/comment/:id/like", post_controller.comment_like_post);
 // router.post(
 //   "/post/:id/comment/:id/comment",

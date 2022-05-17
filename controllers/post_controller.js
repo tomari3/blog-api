@@ -254,6 +254,7 @@ exports.comment_post_get = (req, res, next) => {
 };
 
 exports.comment_post_post = (req, res, next) => {
+  console.log(req.body, req.params.id);
   async.waterfall(
     [
       (next) => {
@@ -266,12 +267,15 @@ exports.comment_post_post = (req, res, next) => {
       (newCom, next) => {
         Post.findByIdAndUpdate(
           req.params.id,
-          { $push: { comments: newCom } },
+          {
+            $push: { comments: { $each: [newCom], $position: 0 } },
+          },
           { new: true }
         )
           .populate({
             path: "comments",
             populate: { path: "author", select: "username" },
+            options: { sort: { date: -1 } },
           })
           .exec(next);
       },
