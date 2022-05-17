@@ -38,14 +38,14 @@ exports.new_post_get = (req, res, next) => {
           .limit(10)
           .populate("tags")
           .populate("comments")
-          .populate("author")
+          .populate("author", "name")
           .exec(cb);
       },
       tags: function (cb) {
         Tag.find({}).limit(20).exec(cb);
       },
       users: function (cb) {
-        User.find({}).limit(10).exec(cb);
+        User.find({}).limit(10).select("username").exec(cb);
       },
     },
     function (err, results) {
@@ -281,6 +281,7 @@ exports.comment_post_post = (req, res, next) => {
         return next(err);
       }
       res.json(results.comments);
+      console.log(results.comments);
     }
   );
 };
