@@ -166,13 +166,11 @@ exports.new_post_post = [
 
 exports.like_post_post = (req, res, next) => {
   if (!req.body.id) {
-    res.status(401).json({ msg: "you're not logged in" });
-    next(err);
+    return res.status(401).json({ msg: "you're not logged in" });
   }
   Post.findById(req.params.id).exec((err, post) => {
     if (err) {
-      res.status(401).json({ msg: "post not found" });
-      next(err);
+      return res.status(401).json({ msg: "post not found" });
     }
     if (post.likes.includes(req.body.id)) {
       Post.findByIdAndUpdate(
@@ -183,8 +181,7 @@ exports.like_post_post = (req, res, next) => {
         { new: true }
       ).exec((err, post) => {
         if (err) {
-          res.status(401).json({ msg: "post or user not found" });
-          next(err);
+          return res.status(401).json({ msg: "user not found" });
         }
         res.json(post.likes);
       });
@@ -197,8 +194,7 @@ exports.like_post_post = (req, res, next) => {
         { new: true }
       ).exec((err, post) => {
         if (err) {
-          res.status(401).json({ msg: "post or user not found" });
-          next(err);
+          return res.status(401).json({ msg: "user not found" });
         }
         res.json(post.likes);
       });
@@ -208,8 +204,7 @@ exports.like_post_post = (req, res, next) => {
 
 exports.save_post_post = (req, res, next) => {
   if (!req.body.id) {
-    res.status(401).json({ msg: "you're not logged in" });
-    next(err);
+    return res.status(401).json({ msg: "you're not logged in" });
   }
   Post.findById(req.params.id).exec((err, post) => {
     if (err) {
@@ -225,8 +220,7 @@ exports.save_post_post = (req, res, next) => {
         { new: true }
       ).exec((err, post) => {
         if (err) {
-          res.status(401).json({ msg: "post or user not found" });
-          next(err);
+          return res.status(401).json({ msg: "post or user not found" });
         }
         res.json(post.saves);
       });
@@ -239,8 +233,7 @@ exports.save_post_post = (req, res, next) => {
         { new: true }
       ).exec((err, post) => {
         if (err) {
-          res.status(401).json({ msg: "post or user not found" });
-          next(err);
+          return res.status(401).json({ msg: "post or user not found" });
         }
         res.json(post.saves);
       });
@@ -297,6 +290,46 @@ exports.comment_post_post = (req, res, next) => {
       console.log(results.comments);
     }
   );
+};
+
+exports.comment_like_post = (req, res, next) => {
+  if (!req.body.id) {
+    return res.status(401).json({ msg: "you're not logged in" });
+  }
+  Comment.findById(req.params.id).exec((err, comment) => {
+    if (err) {
+      res.status(401).json({ msg: "comment not found" });
+      next(err);
+    }
+    if (comment.likes.includes(req.body.id)) {
+      Comment.findByIdAndUpdate(
+        req.params.id,
+        {
+          $pull: { likes: req.body.id },
+        },
+        { new: true }
+      ).exec((err, comment) => {
+        if (err) {
+          return res.status(401).json({ msg: "comment or user not found" });
+        }
+        res.json(comment.likes);
+      });
+    } else {
+      Comment.findByIdAndUpdate(
+        req.params.id,
+        {
+          $push: { likes: req.body.id },
+        },
+        { new: true }
+      ).exec((err, comment) => {
+        if (err) {
+          return res.status(401).json({ msg: "comment or user not found" });
+        }
+        console.log(comment);
+        res.json(comment.likes);
+      });
+    }
+  });
 };
 
 exports.update_post_get = function (req, res, next) {
