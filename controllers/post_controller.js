@@ -165,75 +165,84 @@ exports.new_post_post = [
 ];
 
 exports.like_post_post = (req, res, next) => {
-  if (!req.body.userId) {
-    res.status(401).json(err);
+  if (!req.body.id) {
+    res.status(401).json({ msg: "you're not logged in" });
     next(err);
   }
   Post.findById(req.params.id).exec((err, post) => {
     if (err) {
-      res.status(401).json(err);
+      res.status(401).json({ msg: "post not found" });
       next(err);
     }
-    if (post.likes.includes(req.body.userId)) {
+    if (post.likes.includes(req.body.id)) {
       Post.findByIdAndUpdate(
         req.params.id,
         {
-          $pull: { likes: req.body.userId },
+          $pull: { likes: req.body.id },
         },
         { new: true }
       ).exec((err, post) => {
         if (err) {
-          res.status(401).json(err);
+          res.status(401).json({ msg: "post or user not found" });
           next(err);
         }
         res.json(post.likes);
-        next();
       });
     } else {
       Post.findByIdAndUpdate(
         req.params.id,
         {
-          $push: { likes: req.body.userId },
+          $push: { likes: req.body.id },
         },
         { new: true }
       ).exec((err, post) => {
         if (err) {
-          res.status(401).json(err);
+          res.status(401).json({ msg: "post or user not found" });
           next(err);
         }
         res.json(post.likes);
-        next();
       });
     }
   });
 };
 
 exports.save_post_post = (req, res, next) => {
-  Post.findById(req.body.postID).exec((err, post) => {
-    if (err) return next(err);
-    if (post.saves.includes(req.body.userID)) {
+  if (!req.body.id) {
+    res.status(401).json({ msg: "you're not logged in" });
+    next(err);
+  }
+  Post.findById(req.params.id).exec((err, post) => {
+    if (err) {
+      res.status(401).json({ msg: "post not found" });
+      next(err);
+    }
+    if (post.saves.includes(req.body.id)) {
       Post.findByIdAndUpdate(
-        req.body.postID,
+        req.params.id,
         {
-          $pull: { saves: req.body.userID },
+          $pull: { saves: req.body.id },
         },
         { new: true }
       ).exec((err, post) => {
-        if (err) return next(err);
+        if (err) {
+          res.status(401).json({ msg: "post or user not found" });
+          next(err);
+        }
         res.json(post.saves);
-        next();
       });
     } else {
       Post.findByIdAndUpdate(
-        req.body.postID,
+        req.params.id,
         {
-          $push: { saves: req.body.userID },
+          $push: { saves: req.body.id },
         },
         { new: true }
       ).exec((err, post) => {
-        if (err) return next(err);
+        if (err) {
+          res.status(401).json({ msg: "post or user not found" });
+          next(err);
+        }
         res.json(post.saves);
-        next();
       });
     }
   });
