@@ -21,8 +21,12 @@ router.post("/post/new", post_controller.new_post_post);
 router.post("/post/:id/like", post_controller.like_post_post);
 router.post("/post/:id/save", post_controller.save_post_post);
 
-router.post("/post/:id/comment", post_controller.comment_post_post);
 router.get("/post/:id/comments", post_controller.comment_post_get);
+router.post("/post/:id/comment", post_controller.comment_post_post);
+
+// COMMENT_CONTROLLER
+router.get("/comment/:id/comments", post_controller.sub_comment_post_get);
+router.post("/comment/:id/comment", post_controller.sub_comment_post_post);
 
 router.post("/comment/:id/like", post_controller.comment_like_post);
 

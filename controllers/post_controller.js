@@ -254,6 +254,19 @@ exports.comment_post_get = (req, res, next) => {
       res.json(post.comments);
     });
 };
+exports.sub_comment_post_get = (req, res, next) => {
+  Comment.findById(req.params.id)
+    .populate({
+      path: "subComments",
+      populate: { path: "author", select: "username" },
+    })
+    .exec((err, comment) => {
+      if (err) {
+        next(err);
+      }
+      res.json(comment.subComments);
+    });
+};
 
 exports.comment_post_post = (req, res, next) => {
   console.log(req.body, req.params.id);
@@ -287,6 +300,43 @@ exports.comment_post_post = (req, res, next) => {
         return next(err);
       }
       res.json(results.comments);
+      console.log(results.comments);
+    }
+  );
+};
+
+exports.sub_comment_post_post = (req, res, next) => {
+  console.log(req.body, req.params.id);
+  async.waterfall(
+    [
+      (next) => {
+        new Comment({
+          author: req.body.id,
+          parent: req.params.id,
+          content: req.body.content,
+        }).save(next);
+      },
+      (newCom, next) => {
+        Comment.findByIdAndUpdate(
+          req.params.id,
+          {
+            $push: { subComments: { $each: [newCom], $position: 0 } },
+          },
+          { new: true }
+        )
+          .populate({
+            path: "subComments",
+            populate: { path: "author", select: "username" },
+            options: { sort: { date: -1 } },
+          })
+          .exec(next);
+      },
+    ],
+    (err, results) => {
+      if (err) {
+        return next(err);
+      }
+      res.json(results);
       console.log(results.comments);
     }
   );
