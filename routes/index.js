@@ -12,6 +12,7 @@ var tag_controller = require("../controllers/tag_controller");
 
 /* GET home page. */
 router.get("/", post_controller.index);
+router.use("/auth", require("./auth"));
 router.use("/users", require("./users"));
 
 // POSTS_CONTROLLER

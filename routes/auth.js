@@ -3,7 +3,7 @@ const router = require("express").Router();
 const passport = require("passport");
 const utils = require("../lib/utils");
 
-user_controller = require("../controllers/user_controller");
+auth_controller = require("../controllers/auth_controller");
 const User = require("../models/User");
 
 router.get(
@@ -16,5 +16,13 @@ router.get(
     });
   }
 );
+
+router.post("/signup", auth_controller.signup);
+
+router.post("/login", auth_controller.login);
+
+router.post("/logout", auth_controller.logout);
+
+router.post("/refresh", auth_controller.refresh);
 
 module.exports = router;
