@@ -33,8 +33,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/auth", require("./routes/auth"));
-app.use(utils.verifyJWT);
-app.use("/api", require("./routes/api"));
+
+// app.use(utils.verifyJWT);
+
+app.use("/posts", require("./routes/api/posts"));
 
 // app.use(require("./routes/api"));
 

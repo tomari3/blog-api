@@ -7,44 +7,43 @@ var router = express.Router();
 const passport = require("passport");
 const utils = require("../../lib/utils");
 
-var post_controller = require("../../controllers/post_controller");
+var postController = require("../../controllers/postController");
 var tag_controller = require("../../controllers/tag_controller");
 
 /* GET home page. */
-router.get("/", post_controller.index);
-router.use("/users", require("./users"));
+router.get("/", postController.getAllPosts);
 
 // POSTS_CONTROLLER
-router.get("/post/new", post_controller.new_post_get);
+router.get("/post/new", postController.new_post_get);
 router.post(
   "/post/new",
   passport.authenticate("jwt", { session: false }),
-  post_controller.new_post_post
+  postController.new_post_post
 );
 
-router.post("/post/:id/like", post_controller.like_post_post);
-router.post("/post/:id/save", post_controller.save_post_post);
+router.post("/post/:id/like", postController.like_post_post);
+router.post("/post/:id/save", postController.save_post_post);
 
-router.get("/post/:id/comments", post_controller.comment_post_get);
-router.post("/post/:id/comment", post_controller.comment_post_post);
+router.get("/post/:id/comments", postController.comment_post_get);
+router.post("/post/:id/comment", postController.comment_post_post);
 
 // COMMENT_CONTROLLER
-router.get("/comment/:id/comments", post_controller.sub_comment_post_get);
-router.post("/comment/:id/comment", post_controller.sub_comment_post_post);
+router.get("/comment/:id/comments", postController.sub_comment_post_get);
+router.post("/comment/:id/comment", postController.sub_comment_post_post);
 
-router.post("/comment/:id/like", post_controller.comment_like_post);
+router.post("/comment/:id/like", postController.comment_like_post);
 
-// router.post("/post/:id/comment/:id/like", post_controller.comment_like_post);
+// router.post("/post/:id/comment/:id/like", postController.comment_like_post);
 // router.post(
 //   "/post/:id/comment/:id/comment",
-//   post_controller.comment_comment_post
+//   postController.comment_comment_post
 // );
 
-router.get("/post/:id/update", post_controller.update_post_get);
-router.post("/post/:id/update", post_controller.update_post_post);
+router.get("/post/:id/update", postController.update_post_get);
+router.post("/post/:id/update", postController.update_post_post);
 
-router.get("/post/:id/delete", post_controller.delete_post_get);
-router.post("/post/:id/delete", post_controller.delete_post_post);
+router.get("/post/:id/delete", postController.delete_post_get);
+router.post("/post/:id/delete", postController.delete_post_post);
 
 // // USERS_CONTROLLER
 
@@ -70,5 +69,3 @@ router.get("/tag/:id", tag_controller.tags_posts_get);
 
 // router.get("/tag/:id/delete", tag_controller.delete_tag_get);
 // router.post("/tag/:id/delete", tag_controller.delete_tag_post);
-
-module.exports = router;

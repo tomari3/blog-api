@@ -9,20 +9,14 @@ var UserSchema = new Schema({
   email: { type: String, required: true, unique: true },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
-  isAdmin: { type: Boolean, default: false },
+  roles: [{ type: Object }],
+  refreshToken: [{ type: String }],
+
+  profilePicture: String,
   likedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
   savedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
-  profilePicture: String,
+
   date: { type: Date, default: new Date() },
-  refreshToken: [{ type: String }],
 });
-
-UserSchema.virtual("url").get(function () {
-  return "users/" + this._id;
-});
-
-// UserSchema.virtual("date_format").get(function () {
-//   return DateTime.fromJSDate(this.date).toLocaleString(DateTime.DATE_MED);
-// });
 
 module.exports = mongoose.model("User", UserSchema);

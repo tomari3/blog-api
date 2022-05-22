@@ -1,13 +1,10 @@
-const mongoose = require("mongoose");
 const router = require("express").Router();
 const passport = require("passport");
-const utils = require("../lib/utils");
 
-auth_controller = require("../controllers/auth_controller");
-const User = require("../models/User");
+authController = require("../controllers/authController");
 
 router.get("/", (req, res) => {
-  res.send("HEY");
+  res.json({ msg: "this is the index of auth" });
 });
 
 router.get(
@@ -21,12 +18,12 @@ router.get(
   }
 );
 
-router.post("/signup", auth_controller.signup);
+router.post("/signup", authController.signup);
 
-router.post("/login", auth_controller.login);
+router.post("/login", authController.login);
 
-router.post("/logout", auth_controller.logout);
+router.post("/logout", authController.logout);
 
-router.post("/refresh", auth_controller.refresh);
+router.post("/refresh", authController.refresh);
 
 module.exports = router;

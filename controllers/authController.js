@@ -30,6 +30,7 @@ exports.signup = [
       username: req.body.username,
       hash: hash,
       salt: salt,
+      roles: { Admin: 5150 },
     });
 
     user.save((err) => {
@@ -76,7 +77,6 @@ exports.login = async (req, res) => {
     }
     foundUser.refreshToken = [...newRefreshTokenArray, refreshToken];
     const { _id, username } = await foundUser.save();
-    // console.log(result)
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
@@ -156,16 +156,16 @@ exports.refresh = async (req, res) => {
   });
 };
 
-exports.update_user_get = function (req, res, next) {
-  User.findById(req.params.id).exec(function (err, user) {
-    if (err) {
-      next(err);
-    }
-    if (user == null) {
-      var err = new Error("user not found");
-      err.status = 404;
-      return next(err);
-    }
-    res.json({ user });
-  });
-};
+// exports.update_user_get = function (req, res, next) {
+//   User.findById(req.params.id).exec(function (err, user) {
+//     if (err) {
+//       next(err);
+//     }
+//     if (user == null) {
+//       var err = new Error("user not found");
+//       err.status = 404;
+//       return next(err);
+//     }
+//     res.json({ user });
+//   });
+// };
