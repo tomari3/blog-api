@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 const router = require("express").Router();
 const passport = require("passport");
-const utils = require("../lib/utils");
+const utils = require("../../lib/utils");
 
-user_controller = require("../controllers/user_controller");
-const User = require("../models/User");
+user_controller = require("../../controllers/user_controller");
+const User = require("../../models/User");
 
 router.get(
   "/protected",

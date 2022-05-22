@@ -6,6 +6,10 @@ const utils = require("../lib/utils");
 auth_controller = require("../controllers/auth_controller");
 const User = require("../models/User");
 
+router.get("/", (req, res) => {
+  res.send("HEY");
+});
+
 router.get(
   "/protected",
   passport.authenticate("jwt", { session: false }),

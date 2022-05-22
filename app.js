@@ -7,6 +7,7 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middleware/credentials");
 const logger = require("morgan");
+const utils = require("./lib/utils");
 
 require("dotenv").config();
 
@@ -31,7 +32,9 @@ app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(require("./routes"));
+app.use("/auth", require("./routes/auth"));
+app.use(utils.verifyJWT);
+app.use("/api", require("./routes/api"));
 
 // app.use(require("./routes/api"));
 

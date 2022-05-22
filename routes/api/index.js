@@ -1,18 +1,17 @@
 require("dotenv").config();
 
-const User = require("../models/User");
+const User = require("../../models/User");
 
 var express = require("express");
 var router = express.Router();
 const passport = require("passport");
-const utils = require("../lib/utils");
+const utils = require("../../lib/utils");
 
-var post_controller = require("../controllers/post_controller");
-var tag_controller = require("../controllers/tag_controller");
+var post_controller = require("../../controllers/post_controller");
+var tag_controller = require("../../controllers/tag_controller");
 
 /* GET home page. */
 router.get("/", post_controller.index);
-router.use("/auth", require("./auth"));
 router.use("/users", require("./users"));
 
 // POSTS_CONTROLLER
