@@ -1,9 +1,5 @@
-var Post = require("../models/Post");
 var User = require("../models/User");
-var Comment = require("../models/Comment");
-var Tag = require("../models/Tag");
 
-const passport = require("passport");
 const utils = require("../lib/utils");
 const { body, validationResult } = require("express-validator");
 var async = require("async");
@@ -44,6 +40,53 @@ exports.new_user_post = [
     });
   },
 ];
+
+exports.login = async (req, res) => {
+  const cookies = req.cookies;
+  const { username, password } = req.body;
+  if (!username || !password)
+    return res
+      .status(400)
+      .json({ message: "Username and password are required." });
+  const foundUser = await User.findOne({ username: username }).exec();
+  if (!foundUser) return res.sendStatus(401);
+
+  const valid = utils.validPassword(password, foundUser.hash, foundUser.salt);
+
+  if (valid) {
+    const { accessToken, refreshToken } = utils.issueJWT(foundUser);
+
+    let newRefreshTokenArray = !cookies?.jwt
+      ? foundUser.refreshToken
+      : foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
+
+    if (cookies?.jwt) {
+      const refreshToken = cookies.jwt;
+      const foundToken = await User.findOne({ refreshToken }).exec();
+
+      if (!foundToken) {
+        newRefreshTokenArray = [];
+      }
+
+      res.clearCookie("jwt", {
+        httpOnly: true,
+        sameSite: "none",
+        secure: true,
+      });
+    }
+    foundUser.refreshToken = [...newRefreshTokenArray, refreshToken];
+    const result = await foundUser.save();
+
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.json({ accessToken });
+  } else {
+    res.sendStatus(401);
+  }
+};
 
 exports.update_user_get = function (req, res, next) {
   User.findById(req.params.id).exec(function (err, user) {

@@ -14,7 +14,7 @@ var UserSchema = new Schema({
   savedPosts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
   profilePicture: String,
   date: { type: Date, default: new Date() },
-  token: { type: String },
+  refreshToken: [{ type: String }],
 });
 
 UserSchema.virtual("url").get(function () {

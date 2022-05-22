@@ -1,9 +1,11 @@
 const cors = require("cors");
+const corsOptions = require("./config/corsOptions");
 const passport = require("passport");
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const credentials = require("./middleware/credentials");
 const logger = require("morgan");
 
 require("dotenv").config();
@@ -21,9 +23,11 @@ app.use(passport.initialize());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
-app.use(cors());
+app.use(credentials);
+app.use(cors(corsOptions));
+
+app.use(cookieParser());
 
 app.use(express.static(path.join(__dirname, "public")));
 

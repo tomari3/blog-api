@@ -17,37 +17,7 @@ router.get(
   }
 );
 
-router.post("/login", (req, res, next) => {
-  User.findOne({ username: req.body.username })
-    .then((user) => {
-      if (!user) {
-        return res.status(401).json({ success: false, msg: "no user found" });
-      }
-
-      const isValid = utils.validPassword(
-        req.body.password,
-        user.hash,
-        user.salt
-      );
-
-      if (isValid) {
-        const tokenObject = utils.issueJWT(user);
-
-        res.status(200).json({
-          success: true,
-          user: { id: user._id, name: user.username },
-          accessToken: tokenObject.accessToken,
-          refreshToken: tokenObject.refreshToken,
-          expiresIn: tokenObject.expires,
-        });
-      } else {
-        res.status(401).json({ success: false, msg: "wrong password" });
-      }
-    })
-    .catch((err) => {
-      next(err);
-    });
-});
+router.post("/login", user_controller.login);
 
 router.post("/signup", user_controller.new_user_post);
 

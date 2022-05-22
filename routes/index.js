@@ -16,7 +16,11 @@ router.use("/users", require("./users"));
 
 // POSTS_CONTROLLER
 router.get("/post/new", post_controller.new_post_get);
-router.post("/post/new", post_controller.new_post_post);
+router.post(
+  "/post/new",
+  passport.authenticate("jwt", { session: false }),
+  post_controller.new_post_post
+);
 
 router.post("/post/:id/like", post_controller.like_post_post);
 router.post("/post/:id/save", post_controller.save_post_post);
