@@ -24,6 +24,10 @@ router.post("/login", authController.login);
 
 router.post("/logout", authController.logout);
 
-router.post("/refresh", authController.refresh);
+router.get(
+  "/refresh",
+  passport.authenticate("cookie", { session: false }),
+  authController.refresh
+);
 
 module.exports = router;

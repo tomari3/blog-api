@@ -1,5 +1,5 @@
 var User = require("../models/User");
-
+const passport = require("passport");
 const utils = require("../lib/utils");
 const { body, validationResult } = require("express-validator");
 var async = require("async");
@@ -108,52 +108,56 @@ exports.logout = async (req, res) => {
 };
 
 exports.refresh = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(401);
-  const refreshToken = cookies.jwt;
-  res.clearCookie("jwt", { httpOnly: true, secure: true });
-  const foundUser = await User.findOne({ refreshToken }).exec();
-
-  if (!foundUser) {
-    jwt.verify(refreshToken, process.env.PRIV_KEY, async (err, decoded) => {
-      if (err) return res.sendStatus(403); //Forbidden
-      console.log("attempted refresh token reuse!");
-      const hackedUser = await User.findOne({
-        username: decoded.username,
-      }).exec();
-      hackedUser.refreshToken = [];
-      const result = await hackedUser.save();
-      // console.log(result);
-    });
-    return res.sendStatus(403); //Forbidden
-  }
-  const newRefreshTokenArray = foundUser.refreshToken.filter(
-    (rt) => rt !== refreshToken
-  );
-
-  jwt.verify(refreshToken, process.env.PRIV_KEY, async (err, decoded) => {
-    if (err) {
-      foundUser.refreshToken = [...newRefreshTokenArray];
-      const result = await foundUser.save();
-      // console.log(result)
-    }
-    if (err || foundUser.username !== decoded.username)
-      return res.sendStatus(403);
-
-    const accessToken = utils.issueJWTAccess(foundUser);
-    const refreshToken = utils.issueJWTRefresh(foundUser);
-    foundUser.refreshToken = [...newRefreshTokenArray, refreshToken];
-    const result = await foundUser.save();
-    // console.log(result)
-    res.cookie("jwt", refreshToken, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
-    res.json({ accessToken });
-  });
+  const { accessToken } = utils.issueJWTAccess(req.user);
+  res.json({ accessToken });
 };
+// exports.refresh = async (req, res) => {
+//   const cookies = req.cookies;
+//   if (!cookies?.jwt) return res.sendStatus(401);
+//   const refreshToken = cookies.jwt;
+//   res.clearCookie("jwt", { httpOnly: true, secure: true });
+//   const foundUser = await User.findOne({ refreshToken }).exec();
+
+//   if (!foundUser) {
+//     jwt.verify(refreshToken, process.env.PRIV_KEY, async (err, decoded) => {
+//       if (err) return res.sendStatus(403); //Forbidden
+//       console.log("attempted refresh token reuse!");
+//       const hackedUser = await User.findOne({
+//         username: decoded.username,
+//       }).exec();
+//       hackedUser.refreshToken = [];
+//       const result = await hackedUser.save();
+//       // console.log(result);
+//     });
+//     return res.sendStatus(403); //Forbidden
+//   }
+//   const newRefreshTokenArray = foundUser.refreshToken.filter(
+//     (rt) => rt !== refreshToken
+//   );
+
+//   jwt.verify(refreshToken, process.env.PRIV_KEY, async (err, decoded) => {
+//     if (err) {
+//       foundUser.refreshToken = [...newRefreshTokenArray];
+//       const result = await foundUser.save();
+//       // console.log(result)
+//     }
+//     if (err || foundUser.username !== decoded.username)
+//       return res.sendStatus(403);
+
+//     const accessToken = utils.issueJWTAccess(foundUser);
+//     const refreshToken = utils.issueJWTRefresh(foundUser);
+//     foundUser.refreshToken = [...newRefreshTokenArray, refreshToken];
+//     const result = await foundUser.save();
+//     // console.log(result)
+//     res.cookie("jwt", refreshToken, {
+//       httpOnly: true,
+//       secure: true,
+//       maxAge: 24 * 60 * 60 * 1000,
+//     });
+
+//     res.json({ accessToken });
+//   });
+// };
 
 // exports.update_user_get = function (req, res, next) {
 //   User.findById(req.params.id).exec(function (err, user) {

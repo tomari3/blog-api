@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const passport = require("passport");
 const ROLES_LIST = require("../../config/roles_list");
 const verifyRoles = require("../../middleware/verifyRoles");
 
@@ -8,11 +7,7 @@ const postController = require("../../controllers/postController");
 const tag_controller = require("../../controllers/tag_controller");
 
 /* GET home page. */
-router.get(
-  "/",
-  passport.authenticate("jwt", { session: false }),
-  postController.getAllPosts
-);
+router.get("/", postController.getAllPosts);
 
 // POSTS_CONTROLLER
 router.get("/post/new", postController.new_post_get);

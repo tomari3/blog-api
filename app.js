@@ -34,8 +34,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/auth", require("./routes/auth"));
 
-// app.use(utils.verifyJWT);
-
+app.use(passport.authenticate("access", { session: false }));
 app.use("/posts", require("./routes/api/posts"));
 
 // app.use(require("./routes/api"));
