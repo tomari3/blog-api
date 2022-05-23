@@ -1,168 +1,158 @@
-var Post = require("../models/Post");
-var User = require("../models/User");
-var Comment = require("../models/Comment");
-var Tag = require("../models/Tag");
+const Post = require("../models/Post");
+const User = require("../models/User");
+const Comment = require("../models/Comment");
+const Tag = require("../models/Tag");
 
 const { body, validationResult } = require("express-validator");
-var async = require("async");
+const async = require("async");
 
-exports.getAllPosts = (req, res, next) => {
-  async.parallel(
-    {
-      posts: function (cb) {
-        Post.find()
-          .sort({ date: -1 })
-          .populate("author", "username")
-          .populate("tags")
-          .exec(cb);
-      },
-      tags: function (cb) {
-        Tag.find({}).exec(cb);
-      },
-    },
-    function (err, results) {
-      if (err) {
-        next(err);
-      }
-      res.json({ posts: results.posts, tags: results.tags });
-    }
-  );
+exports.getAllPosts = async (req, res) => {
+  const posts = await Post.find({})
+    .sort({ date: -1 })
+    .populate("author", "username")
+    .populate("tags");
+  if (!posts) return res.status(204).json({ message: "No posts found." });
+  res.json(posts);
 };
 
-exports.new_post_get = (req, res, next) => {
-  async.parallel(
-    {
-      posts: function (cb) {
-        Post.find({})
-          .sort({ date: 1 })
-          .limit(10)
-          .populate("tags")
-          .populate("comments")
-          .populate("author", "name")
-          .exec(cb);
-      },
-      tags: function (cb) {
-        Tag.find({}).limit(20).exec(cb);
-      },
-      users: function (cb) {
-        User.find({}).limit(10).select("username").exec(cb);
-      },
-    },
-    function (err, results) {
-      if (err) {
-        return next(err);
-      }
-      res.json({
-        posts: results.posts,
-        tags: results.tags,
-        users: results.users,
-      });
-    }
+exports.newPost = async (req, res) => {
+  const tags = await Promise.all(
+    req.body.tags.split(",").map(async (tag) => {
+      tag.trim();
+      return await Tag.findOneAndUpdate(
+        { name: tag },
+        {},
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+    })
   );
-};
-
-exports.new_post_post = [
-  (req, res, next) => {
-    const tags = [];
-    req.body.tags.split(",").map((tag, i) => {
-      tags.push(tag.trim());
-    });
-    req.body.tags = tags;
-    next();
-  },
-
-  body("content")
-    .trim()
-    .isLength({ min: 1 })
-    .escape()
-    .withMessage("must provide content"),
-  body("status").escape().default("private"),
-  body("isPinned").escape().default("false"),
-  body("tags.*").escape(),
-
-  (req, res, next) => {
-    const allTags = [];
-    req.body.tags.map((tag) => {
-      Tag.findOne({ name: tag }).exec((err, found) => {
-        if (err) {
-          next(err);
-        }
-        found
-          ? allTags.push(found)
-          : (found = new Tag({ name: tag }).save((err, new_tag) => {
-              if (err) return next(err);
-              allTags.push(new_tag);
-              if (req.body.tags.length === allTags.length) {
-                req.body.tags = allTags;
-                console.log("next");
-                next();
-              }
-            }));
-        if (req.body.tags.length === allTags.length) {
-          req.body.tags = allTags;
-          console.log("next");
-          next();
-        }
-      });
-    });
-  },
-
-  (req, res, next) => {
-    User.findById(req.body.id).exec((err, found) => {
-      if (err) return next(err);
-      req.body.id = found;
-      next();
-    });
-  },
-
-  (req, res, next) => {
-    const errors = validationResult(req);
-
-    console.log(req.body);
-
-    var post = new Post({
+  body("id").isLength({ min: 1 }).escape().withMessage("must provide user"),
+    body("content")
+      .trim()
+      .isLength({ min: 1 })
+      .escape()
+      .withMessage("must provide content"),
+    body("status").escape().default("private"),
+    body("isPinned").escape().default("false"),
+    body("tags.*").escape(),
+    (errors = validationResult(req));
+  if (!errors.isEmpty()) return res.json({ err: errors });
+  try {
+    const result = await Post.create({
       author: req.body.id,
       content: req.body.content,
       status: req.body.status,
       isPinned: req.body.isPinned,
-      tags: req.body.tags,
+      tags: tags,
     });
+    const post = await result.populate("tags");
 
-    if (!errors.isEmpty()) {
-      async.parallel({
-        posts: function (cb) {
-          Post.find()
-            .limit(10)
-            .populate("tags")
-            .populate("comments")
-            .populate("likes")
-            .populate("saves")
-            .sort({ date: 1 })
-            .exec(cb);
-        },
-        tags: function (cb) {
-          Tag.find({}).exec(cb);
-        },
-        users: function (cb) {
-          User.find().limit(10).exec(cb);
-        },
-      });
+    res.status(201).json(post);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
-      res.json({
-        posts: results.posts,
-        tags: results.tags,
-        users: results.users,
-      });
-    } else {
-      post.save(function (err) {
-        if (err) {
-          return next(err);
-        }
-        res.json(post);
-      });
-    }
-  },
-];
+// exports.newPost = [
+//   (req, res, next) => {
+//     const tags = [];
+//     req.body.tags.split(",").map((tag, i) => {
+//       tags.push(tag.trim());
+//     });
+//     req.body.tags = tags;
+//     next();
+//   },
+//   body("id").isLength({ min: 1 }).escape().withMessage("must provide user"),
+//   body("content")
+//     .trim()
+//     .isLength({ min: 1 })
+//     .escape()
+//     .withMessage("must provide content"),
+//   body("status").escape().default("private"),
+//   body("isPinned").escape().default("false"),
+//   body("tags.*").escape(),
+
+//   (req, res, next) => {
+//     const allTags = [];
+//     req.body.tags.map((tag) => {
+//       Tag.findOne({ name: tag }).exec((err, found) => {
+//         if (err) {
+//           next(err);
+//         }
+//         found
+//           ? allTags.push(found)
+//           : (found = new Tag({ name: tag }).save((err, new_tag) => {
+//               if (err) return next(err);
+//               allTags.push(new_tag);
+//               if (req.body.tags.length === allTags.length) {
+//                 req.body.tags = allTags;
+//                 console.log("next");
+//                 next();
+//               }
+//             }));
+//         if (req.body.tags.length === allTags.length) {
+//           req.body.tags = allTags;
+//           console.log("next");
+//           next();
+//         }
+//       });
+//     });
+//   },
+
+//   (req, res, next) => {
+//     User.findById(req.body.id).exec((err, found) => {
+//       if (err) return next(err);
+//       req.body.id = found;
+//       next();
+//     });
+//   },
+
+//   (req, res, next) => {
+//     const errors = validationResult(req);
+
+//     const post = new Post({
+//       author: req.body.id,
+//       content: req.body.content,
+//       status: req.body.status,
+//       isPinned: req.body.isPinned,
+//       tags: req.body.tags,
+//     });
+
+//     if (!errors.isEmpty()) {
+//       async.parallel({
+//         posts: function (cb) {
+//           Post.find()
+//             .limit(10)
+//             .populate("tags")
+//             .populate("comments")
+//             .populate("likes")
+//             .populate("saves")
+//             .sort({ date: 1 })
+//             .exec(cb);
+//         },
+//         tags: function (cb) {
+//           Tag.find({}).exec(cb);
+//         },
+//         users: function (cb) {
+//           User.find().limit(10).exec(cb);
+//         },
+//       });
+
+//       res.json({
+//         posts: results.posts,
+//         tags: results.tags,
+//         users: results.users,
+//       });
+//     } else {
+//       post.save((err) => {
+//         if (err) {
+//           return next(err);
+//         }
+//         res.json(post);
+//       });
+//     }
+//   },
+// ];
 
 exports.like_post_post = (req, res, next) => {
   if (!req.body.id) {

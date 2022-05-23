@@ -7,17 +7,13 @@ const postController = require("../../controllers/postController");
 const tag_controller = require("../../controllers/tag_controller");
 
 /* GET home page. */
-router.get("/", postController.getAllPosts);
+router.route("/").get(postController.getAllPosts).post(postController.newPost);
 
-// POSTS_CONTROLLER
-router.get("/post/new", postController.new_post_get);
-router.post("/post/new", postController.new_post_post);
+router.post("/:id/like", postController.like_post_post);
+router.post("/:id/save", postController.save_post_post);
 
-router.post("/post/:id/like", postController.like_post_post);
-router.post("/post/:id/save", postController.save_post_post);
-
-router.get("/post/:id/comments", postController.comment_post_get);
-router.post("/post/:id/comment", postController.comment_post_post);
+router.get("/:id/comments", postController.comment_post_get);
+router.post("/:id/comment", postController.comment_post_post);
 
 // COMMENT_CONTROLLER
 router.get("/comment/:id/comments", postController.sub_comment_post_get);
@@ -25,17 +21,17 @@ router.post("/comment/:id/comment", postController.sub_comment_post_post);
 
 router.post("/comment/:id/like", postController.comment_like_post);
 
-// router.post("/post/:id/comment/:id/like", postController.comment_like_post);
+// router.post("/:id/comment/:id/like", postController.comment_like_post);
 // router.post(
-//   "/post/:id/comment/:id/comment",
+//   "/:id/comment/:id/comment",
 //   postController.comment_comment_post
 // );
 
-router.get("/post/:id/update", postController.update_post_get);
-router.post("/post/:id/update", postController.update_post_post);
+router.get("/:id/update", postController.update_post_get);
+router.post("/:id/update", postController.update_post_post);
 
-router.get("/post/:id/delete", postController.delete_post_get);
-router.post("/post/:id/delete", postController.delete_post_post);
+router.get("/:id/delete", postController.delete_post_get);
+router.post("/:id/delete", postController.delete_post_post);
 
 // // USERS_CONTROLLER
 
