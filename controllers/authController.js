@@ -108,8 +108,9 @@ exports.logout = async (req, res) => {
 };
 
 exports.refresh = async (req, res) => {
+  const { _id, username, roles } = req.user;
   const { accessToken } = utils.issueJWTAccess(req.user);
-  res.json({ accessToken });
+  res.json({ _id, username, roles, accessToken });
 };
 // exports.refresh = async (req, res) => {
 //   const cookies = req.cookies;
