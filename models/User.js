@@ -9,7 +9,7 @@ var UserSchema = new Schema({
   email: { type: String, required: true, unique: true },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
-  roles: [{ type: Object }],
+  roles: { type: Object },
   refreshToken: [{ type: String }],
 
   profilePicture: String,

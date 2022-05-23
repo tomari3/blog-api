@@ -30,7 +30,7 @@ exports.signup = [
       username: req.body.username,
       hash: hash,
       salt: salt,
-      roles: { Admin: 5150 },
+      roles: { Admin: 5150, Editor: 1984, User: 2001 },
     });
 
     user.save((err) => {
@@ -76,14 +76,13 @@ exports.login = async (req, res) => {
       });
     }
     foundUser.refreshToken = [...newRefreshTokenArray, refreshToken];
-    const { _id, username } = await foundUser.save();
-
+    const { _id, username, roles } = await foundUser.save();
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
     });
-    res.json({ _id, username, accessToken });
+    res.json({ _id, username, roles, accessToken });
   } else {
     res.sendStatus(401);
   }
