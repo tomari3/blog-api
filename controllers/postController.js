@@ -228,8 +228,8 @@ exports.postSubComment = (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.json(results);
-      console.log(results.comments);
+      res.json(results.subComments);
+      console.log(results);
     }
   );
 };
