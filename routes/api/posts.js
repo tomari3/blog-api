@@ -9,23 +9,20 @@ const tag_controller = require("../../controllers/tag_controller");
 /* GET home page. */
 router.route("/").get(postController.getAllPosts).post(postController.newPost);
 
-router.post("/:id/like", postController.like_post_post);
-router.post("/:id/save", postController.save_post_post);
+router.post("/:id/like", postController.likePost);
+router.post("/:id/save", postController.savePost);
 
-router.get("/:id/comments", postController.comment_post_get);
-router.post("/:id/comment", postController.comment_post_post);
+router
+  .route("/:id/comments")
+  .get(postController.getComments)
+  .post(postController.postComment);
 
-// COMMENT_CONTROLLER
-router.get("/comment/:id/comments", postController.sub_comment_post_get);
-router.post("/comment/:id/comment", postController.sub_comment_post_post);
+router
+  .route("/comment/:id/comments")
+  .get(postController.getSubComments)
+  .post(postController.postSubComment);
 
-router.post("/comment/:id/like", postController.comment_like_post);
-
-// router.post("/:id/comment/:id/like", postController.comment_like_post);
-// router.post(
-//   "/:id/comment/:id/comment",
-//   postController.comment_comment_post
-// );
+router.post("/comment/:id/like", postController.likeComment);
 
 router.get("/:id/update", postController.update_post_get);
 router.post("/:id/update", postController.update_post_post);

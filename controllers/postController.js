@@ -26,6 +26,7 @@ exports.newPost = async (req, res) => {
       );
     })
   );
+
   body("id").isLength({ min: 1 }).escape().withMessage("must provide user"),
     body("content")
       .trim()
@@ -36,16 +37,17 @@ exports.newPost = async (req, res) => {
     body("isPinned").escape().default("false"),
     body("tags.*").escape(),
     (errors = validationResult(req));
+
   if (!errors.isEmpty()) return res.json({ err: errors });
   try {
-    const result = await Post.create({
+    let post = await Post.create({
       author: req.body.id,
       content: req.body.content,
       status: req.body.status,
       isPinned: req.body.isPinned,
       tags: tags,
     });
-    const post = await result.populate("tags");
+    post = await post.populate([{ path: "author", select: "username" }]);
 
     res.status(201).json(post);
   } catch (err) {
@@ -53,108 +55,7 @@ exports.newPost = async (req, res) => {
   }
 };
 
-// exports.newPost = [
-//   (req, res, next) => {
-//     const tags = [];
-//     req.body.tags.split(",").map((tag, i) => {
-//       tags.push(tag.trim());
-//     });
-//     req.body.tags = tags;
-//     next();
-//   },
-//   body("id").isLength({ min: 1 }).escape().withMessage("must provide user"),
-//   body("content")
-//     .trim()
-//     .isLength({ min: 1 })
-//     .escape()
-//     .withMessage("must provide content"),
-//   body("status").escape().default("private"),
-//   body("isPinned").escape().default("false"),
-//   body("tags.*").escape(),
-
-//   (req, res, next) => {
-//     const allTags = [];
-//     req.body.tags.map((tag) => {
-//       Tag.findOne({ name: tag }).exec((err, found) => {
-//         if (err) {
-//           next(err);
-//         }
-//         found
-//           ? allTags.push(found)
-//           : (found = new Tag({ name: tag }).save((err, new_tag) => {
-//               if (err) return next(err);
-//               allTags.push(new_tag);
-//               if (req.body.tags.length === allTags.length) {
-//                 req.body.tags = allTags;
-//                 console.log("next");
-//                 next();
-//               }
-//             }));
-//         if (req.body.tags.length === allTags.length) {
-//           req.body.tags = allTags;
-//           console.log("next");
-//           next();
-//         }
-//       });
-//     });
-//   },
-
-//   (req, res, next) => {
-//     User.findById(req.body.id).exec((err, found) => {
-//       if (err) return next(err);
-//       req.body.id = found;
-//       next();
-//     });
-//   },
-
-//   (req, res, next) => {
-//     const errors = validationResult(req);
-
-//     const post = new Post({
-//       author: req.body.id,
-//       content: req.body.content,
-//       status: req.body.status,
-//       isPinned: req.body.isPinned,
-//       tags: req.body.tags,
-//     });
-
-//     if (!errors.isEmpty()) {
-//       async.parallel({
-//         posts: function (cb) {
-//           Post.find()
-//             .limit(10)
-//             .populate("tags")
-//             .populate("comments")
-//             .populate("likes")
-//             .populate("saves")
-//             .sort({ date: 1 })
-//             .exec(cb);
-//         },
-//         tags: function (cb) {
-//           Tag.find({}).exec(cb);
-//         },
-//         users: function (cb) {
-//           User.find().limit(10).exec(cb);
-//         },
-//       });
-
-//       res.json({
-//         posts: results.posts,
-//         tags: results.tags,
-//         users: results.users,
-//       });
-//     } else {
-//       post.save((err) => {
-//         if (err) {
-//           return next(err);
-//         }
-//         res.json(post);
-//       });
-//     }
-//   },
-// ];
-
-exports.like_post_post = (req, res, next) => {
+exports.likePost = (req, res, next) => {
   if (!req.body.id) {
     return res.status(401).json({ msg: "you're not logged in" });
   }
@@ -192,7 +93,7 @@ exports.like_post_post = (req, res, next) => {
   });
 };
 
-exports.save_post_post = (req, res, next) => {
+exports.savePost = (req, res, next) => {
   if (!req.body.id) {
     return res.status(401).json({ msg: "you're not logged in" });
   }
@@ -231,7 +132,7 @@ exports.save_post_post = (req, res, next) => {
   });
 };
 
-exports.comment_post_get = (req, res, next) => {
+exports.getComments = (req, res, next) => {
   Post.findById(req.params.id)
     .populate({
       path: "comments",
@@ -244,7 +145,8 @@ exports.comment_post_get = (req, res, next) => {
       res.json(post.comments);
     });
 };
-exports.sub_comment_post_get = (req, res, next) => {
+
+exports.getSubComments = (req, res, next) => {
   Comment.findById(req.params.id)
     .populate({
       path: "subComments",
@@ -258,7 +160,7 @@ exports.sub_comment_post_get = (req, res, next) => {
     });
 };
 
-exports.comment_post_post = (req, res, next) => {
+exports.postComment = (req, res, next) => {
   console.log(req.body, req.params.id);
   async.waterfall(
     [
@@ -295,7 +197,7 @@ exports.comment_post_post = (req, res, next) => {
   );
 };
 
-exports.sub_comment_post_post = (req, res, next) => {
+exports.postSubComment = (req, res, next) => {
   console.log(req.body, req.params.id);
   async.waterfall(
     [
@@ -332,7 +234,7 @@ exports.sub_comment_post_post = (req, res, next) => {
   );
 };
 
-exports.comment_like_post = (req, res, next) => {
+exports.likeComment = (req, res, next) => {
   if (!req.body.id) {
     return res.status(401).json({ msg: "you're not logged in" });
   }
@@ -365,7 +267,6 @@ exports.comment_like_post = (req, res, next) => {
         if (err) {
           return res.status(401).json({ msg: "comment or user not found" });
         }
-        console.log(comment);
         res.json(comment.likes);
       });
     }
@@ -423,6 +324,7 @@ exports.update_post_get = function (req, res, next) {
     }
   );
 };
+
 exports.update_post_post = [
   (req, res, next) => {
     if (!(req.body.tags instanceof Array)) {
