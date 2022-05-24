@@ -156,6 +156,7 @@ exports.getSubComments = (req, res, next) => {
       if (err) {
         next(err);
       }
+      console.log(comment.subComments);
       res.json(comment.subComments);
     });
 };
@@ -198,7 +199,6 @@ exports.postComment = (req, res, next) => {
 };
 
 exports.postSubComment = (req, res, next) => {
-  console.log(req.body, req.params.id);
   async.waterfall(
     [
       (next) => {
@@ -240,8 +240,7 @@ exports.likeComment = (req, res, next) => {
   }
   Comment.findById(req.params.id).exec((err, comment) => {
     if (err) {
-      res.status(401).json({ msg: "comment not found" });
-      next(err);
+      return res.status(401).json({ msg: "comment not found" });
     }
     if (comment.likes.includes(req.body.id)) {
       Comment.findByIdAndUpdate(
@@ -251,8 +250,9 @@ exports.likeComment = (req, res, next) => {
         },
         { new: true }
       ).exec((err, comment) => {
+        console.log(comment);
         if (err) {
-          return res.status(401).json({ msg: "comment or user not found" });
+          return res.status(401).json({ msg: "user not found" });
         }
         res.json(comment.likes);
       });
@@ -265,7 +265,7 @@ exports.likeComment = (req, res, next) => {
         { new: true }
       ).exec((err, comment) => {
         if (err) {
-          return res.status(401).json({ msg: "comment or user not found" });
+          return res.status(401).json({ msg: "user not found" });
         }
         res.json(comment.likes);
       });

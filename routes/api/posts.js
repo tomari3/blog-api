@@ -18,11 +18,11 @@ router
   .post(postController.postComment);
 
 router
-  .route("/comment/:id/comments")
+  .route("/comments/:id/comments")
   .get(postController.getSubComments)
   .post(postController.postSubComment);
 
-router.post("/comment/:id/like", postController.likeComment);
+router.post("/comments/:id/like", postController.likeComment);
 
 router.get("/:id/update", postController.update_post_get);
 router.post("/:id/update", postController.update_post_post);
