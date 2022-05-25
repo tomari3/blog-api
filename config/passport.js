@@ -31,11 +31,14 @@ module.exports = (passport) => {
     new JwtStrategy(access, (payload, done) => {
       User.findById({ _id: payload._id }, (err, user) => {
         if (err) {
+          // console.log("failed access");
           return done(err, false); // error no user
         }
         if (user) {
+          // console.log("checked access");
           return done(null, user); // no error, correct user
         } else {
+          // console.log("failed access");
           return done(null, false); // no error, incorrect user
         }
       });
@@ -46,14 +49,14 @@ module.exports = (passport) => {
     new JwtStrategy(cookie, (payload, done) => {
       User.findById({ _id: payload._id }, (err, user) => {
         if (err) {
-          console.log("no user");
+          // console.log("failed cookie");
           return done(err, false); // error no user
         }
         if (user) {
-          console.log("correct user");
+          // console.log("checked cookie");
           return done(null, user); // no error, correct user
         } else {
-          console.log("incorrect user");
+          // console.log("failed cookie");
           return done(null, false); // no error, incorrect user
         }
       });

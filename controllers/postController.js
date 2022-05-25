@@ -160,6 +160,7 @@ exports.getComments = (req, res, next) => {
       if (err) {
         next(err);
       }
+      res.json(post.comments);
     });
 };
 

@@ -35,6 +35,7 @@ app.use("/auth", require("./routes/auth"));
 
 app.use(passport.authenticate("access", { session: false }));
 app.use("/posts", require("./routes/api/posts"));
+app.use("/users", require("./routes/api/users"));
 
 // app.use(require("./routes/api"));
 
