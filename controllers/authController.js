@@ -96,7 +96,6 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-  console.log("started logout ---------------");
   // no cookies, logged out.
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.sendStatus(204); //No content
@@ -112,11 +111,9 @@ exports.logout = async (req, res) => {
     return res.sendStatus(204);
   }
   // delete refresh tokens
-  foundUser.refreshToken = foundUser.refreshToken.filter(
-    (rt) => rt !== refreshToken
-  );
+  foundUser.refreshToken = "";
   const result = await foundUser.save();
-  // console.log(result);
+  console.log(result);
 
   res.clearCookie("jwt", {
     path: "/",
@@ -127,7 +124,6 @@ exports.logout = async (req, res) => {
 };
 
 exports.refresh = async (req, res) => {
-  console.log("started refresh ---------------");
   const cookies = req.cookies.jwt;
   res.clearCookie("jwt", {
     path: "/",
