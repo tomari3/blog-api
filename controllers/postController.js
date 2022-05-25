@@ -15,6 +15,24 @@ exports.getAllPosts = async (req, res) => {
   res.json(posts);
 };
 
+exports.getPost = async (req, res) => {
+  const post = await Post.findById(req.params.id)
+    .populate({
+      path: "comments",
+      populate: { path: "author", select: "username" },
+      populate: {
+        path: "subComments",
+        select: ["content", "date"],
+        populate: { path: "author", select: "username" },
+      },
+    })
+    .populate("author", "username")
+    .populate("tags");
+
+  if (!post) return res.status(404).json({ message: "post not found." });
+  res.json(post);
+};
+
 exports.newPost = async (req, res) => {
   const tags = await Promise.all(
     req.body.tags.split(",").map(async (tag) => {

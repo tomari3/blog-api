@@ -9,6 +9,8 @@ const tag_controller = require("../../controllers/tag_controller");
 /* GET home page. */
 router.route("/").get(postController.getAllPosts).post(postController.newPost);
 
+router.route("/:id").get(postController.getPost);
+
 router.post("/:id/like", postController.likePost);
 router.post("/:id/save", postController.savePost);
 
