@@ -15,30 +15,31 @@ exports.signup = [
     .isLength({ min: 8 })
     .withMessage("password must be at least 8 characters"),
 
-  (req, res, next) => {
+  async (req, res, next) => {
+    const { username, password } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    const saltHash = utils.genPassword(req.body.password);
+    const duplicate = await User.findOne({ username: username }).exec();
+    if (duplicate) return res.sendStatus(409); //Conflict
 
-    const salt = saltHash.salt;
-    const hash = saltHash.hash;
+    try {
+      const saltHash = utils.genPassword(password);
+      const salt = saltHash.salt;
+      const hash = saltHash.hash;
 
-    const user = new User({
-      email: req.body.email,
-      username: req.body.username,
-      hash: hash,
-      salt: salt,
-      roles: { Admin: 5150, Editor: 1984, User: 2001 },
-    });
-
-    user.save((err) => {
-      if (err) {
-        return next(err);
-      }
-      res.json(user);
-    });
+      const user = await User.create({
+        email: req.body.email,
+        username: req.body.username,
+        hash: hash,
+        salt: salt,
+        roles: { Admin: 5150, Editor: 1984, User: 2001 },
+      });
+      res.status(201).json({ success: `New user ${user} created!` });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   },
 ];
 
@@ -49,6 +50,7 @@ exports.login = async (req, res) => {
     return res
       .status(400)
       .json({ message: "Username and password are required." });
+
   const foundUser = await User.findOne({ username: username }).exec();
   if (!foundUser) return res.sendStatus(401);
 
@@ -63,8 +65,10 @@ exports.login = async (req, res) => {
       : foundUser.refreshToken.filter((rt) => rt !== cookies.jwt);
 
     if (cookies?.jwt) {
-      const refreshToken = cookies.jwt;
-      const foundToken = await User.findOne({ refreshToken }).exec();
+      const oldRefreshToken = cookies.jwt;
+      const foundToken = await User.findOne({
+        refreshToken: oldRefreshToken,
+      }).exec();
 
       if (!foundToken) {
         newRefreshTokenArray = [];
@@ -72,16 +76,21 @@ exports.login = async (req, res) => {
 
       res.clearCookie("jwt", {
         httpOnly: true,
+        sameSite: "strict",
         secure: true,
       });
     }
+
     foundUser.refreshToken = [...newRefreshTokenArray, refreshToken];
     const { _id, username, roles } = await foundUser.save();
+
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000,
     });
+
     res.json({ _id, username, roles, accessToken });
   } else {
     res.sendStatus(401);
@@ -89,27 +98,35 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
+  // no cookies, logged out.
   const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(204); // no content
+  if (!cookies?.jwt) return res.sendStatus(204);
   const refreshToken = cookies.jwt;
-  const foundUser = await User.findOne({ refreshToken }).exec();
-  if (!foundUser) {
-    res.clearCookie("jwt", { httpOnly: true, secure: true });
-    return res.sendStatus(204);
-  }
-  foundUser.refreshToken = foundUser.refreshToken.filter(
-    (rt) => rt !== refreshToken
+  // check refresh token in users if found delete
+  const foundUser = await User.findOneAndUpdate(
+    { refreshToken: refreshToken },
+    { refreshToken: "" },
+    { new: true }
   );
-  const result = await foundUser.save();
-  // console.log(result)
 
-  res.clearCookie("jwt", { httpOnly: true, secure: true });
-  res.sendStatus(204);
+  res.cookie("jwt", "", { maxAge: 1 });
+  res.redirect("/");
+  console.log("3 ----- | cleared cookies: ", req.cookies);
 };
 
 exports.refresh = async (req, res) => {
+  const cookies = req.cookies;
+  if (!cookies?.jwt) return res.sendStatus(401);
+  res.cookie("jwt", "", { maxAge: 1 });
+
   const { _id, username, roles } = req.user;
   const { accessToken } = utils.issueJWTAccess(req.user);
+  const { refreshToken } = utils.issueJWTRefresh(req.user);
+  res.cookie("jwt", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+  });
   res.json({ _id, username, roles, accessToken });
 };
 // exports.refresh = async (req, res) => {
