@@ -76,7 +76,6 @@ exports.login = async (req, res) => {
 
       res.clearCookie("jwt", {
         httpOnly: true,
-        sameSite: "strict",
         secure: true,
       });
     }
@@ -87,7 +86,6 @@ exports.login = async (req, res) => {
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -98,37 +96,72 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
+  console.log("started logout ---------------");
   // no cookies, logged out.
   const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(204);
+  if (!cookies?.jwt) return res.sendStatus(204); //No content
   const refreshToken = cookies.jwt;
-  // check refresh token in users if found delete
-  const foundUser = await User.findOneAndUpdate(
-    { refreshToken: refreshToken },
-    { refreshToken: "" },
-    { new: true }
+  // check refresh token in users
+  const foundUser = await User.findOne({ refreshToken }).exec();
+  if (!foundUser) {
+    res.clearCookie("jwt", {
+      path: "/",
+      secure: true,
+      httpOnly: true,
+    });
+    return res.sendStatus(204);
+  }
+  // delete refresh tokens
+  foundUser.refreshToken = foundUser.refreshToken.filter(
+    (rt) => rt !== refreshToken
   );
+  const result = await foundUser.save();
+  // console.log(result);
 
-  res.cookie("jwt", "", { maxAge: 1 });
-  res.redirect("/");
-  console.log("3 ----- | cleared cookies: ", req.cookies);
+  res.clearCookie("jwt", {
+    path: "/",
+    secure: true,
+    httpOnly: true,
+  });
+  res.sendStatus(204);
 };
 
 exports.refresh = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(401);
-  res.cookie("jwt", "", { maxAge: 1 });
+  console.log("started refresh ---------------");
+  const cookies = req.cookies.jwt;
+  res.clearCookie("jwt", {
+    path: "/",
+    secure: true,
+    httpOnly: true,
+  });
+  const foundUser = await User.findOne({ cookies }).exec();
 
-  const { _id, username, roles } = req.user;
-  const { accessToken } = utils.issueJWTAccess(req.user);
-  const { refreshToken } = utils.issueJWTRefresh(req.user);
+  if (!foundUser) {
+    req.user.refreshToken = [];
+    console.log("deleted stolen user's tokens");
+    const result = await req.user.save();
+    return res.sendStatus(403); //Forbidden
+  }
+
+  const newRefreshTokenArray = foundUser.refreshToken.filter(
+    (rt) => rt !== cookies
+  );
+
+  const { accessToken } = utils.issueJWTAccess(foundUser);
+  const { refreshToken } = utils.issueJWTRefresh(foundUser);
+
+  foundUser.refreshToken = [...newRefreshTokenArray, refreshToken];
+  const { _id, username, roles } = await foundUser.save();
+
   res.cookie("jwt", refreshToken, {
     httpOnly: true,
     secure: true,
     maxAge: 24 * 60 * 60 * 1000,
   });
+
   res.json({ _id, username, roles, accessToken });
 };
+
 // exports.refresh = async (req, res) => {
 //   const cookies = req.cookies;
 //   if (!cookies?.jwt) return res.sendStatus(401);

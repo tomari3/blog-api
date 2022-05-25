@@ -19,7 +19,7 @@ var cookieExtractor = (req) => {
   return token;
 };
 
-const refresh = {
+const cookie = {
   jwtFromRequest: cookieExtractor,
   secretOrKey: PUB_KEY,
   algorithms: ["RS256"],
@@ -43,7 +43,7 @@ module.exports = (passport) => {
   );
   passport.use(
     "cookie",
-    new JwtStrategy(refresh, (payload, done) => {
+    new JwtStrategy(cookie, (payload, done) => {
       User.findById({ _id: payload._id }, (err, user) => {
         if (err) {
           console.log("no user");
